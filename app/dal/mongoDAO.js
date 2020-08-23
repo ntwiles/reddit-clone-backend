@@ -26,7 +26,7 @@ class MongoDAO extends DAO {
     getDatumById(collectionName, id) {
         return new Promise((resolve, reject) => {
             this.getCollection(collectionName,(dbClient, collection) => {
-                collection.findOne(new ObjectID(id))
+                collection.findOne({ '_id': ObjectID(id) })
                     .then((data) => {
                         dbClient.close();
                         resolve(data);
@@ -53,7 +53,7 @@ class MongoDAO extends DAO {
         });
     }
     
-    getSortedData(collectionName, query, sortMethod, res) {
+    getSortedData(collectionName, query, sortMethod) {
         return new Promise((resolve, reject) => {
             this.getCollection(collectionName,(dbClient,collection) => {
                 collection.find(query)

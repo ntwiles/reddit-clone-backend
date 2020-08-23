@@ -9,7 +9,7 @@ const cors = require('cors');
 
 // GraphQL
 const { graphqlHTTP } = require('express-graphql');
-const { buildSchema } = require('graphql');
+const { buildSchema, GraphQLEnumType } = require('graphql');
 
 // Settings
 const port = 5000;
@@ -38,9 +38,8 @@ let schema = buildSchema(`
 
     type Query {
         forums: [Forum]
-        posts(forum: String): [Post]
+        posts(sortMethod: String, forum: String): [Post]
         post(id: String!): Post
-        feed()
     }
 `);
 
@@ -67,10 +66,24 @@ let root = {
         const forums = await dao.getData('forums',query);
         return forums.map(f => new Forum(f));
     },
-    posts: async ({forum}) => {
+    posts: async ({forum, sortMethod}) => {
         let query = {};
+        let sort = {};
+        let posts;
+
         if (forum) query.forum = forum;
-        const posts = await dao.getData('posts', query);
+
+        if (sortMethod) {
+            switch (sortMethod) {
+                case "new": sort = { timePosted: -1}; break;
+                case "hot": sort = { numComments: -1}; break;
+                default: sort = { numComments: -1}; break;
+            }
+            
+            posts = await dao.getSortedData('posts',query,sort);
+        }
+        else posts = await dao.getData('posts', query);
+
         return posts.map(p => new Post(p));
     },
     post: async ({id}) => {
