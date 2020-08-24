@@ -41,6 +41,10 @@ let schema = buildSchema(`
         posts(sortMethod: String, forum: String): [Post]
         post(id: String!): Post
     }
+
+    type Mutation {
+        createPost(title: String!, forum: String!, message: String, url: String, type: String!): Post
+    }
 `);
 
 class Forum {
@@ -90,6 +94,11 @@ let root = {
         const post = await dao.getDatumById('posts', id);
         return new Post(post);
     },
+    createPost: async ({title, forum, type, message, url}) => {
+        const mutation = { title: title, forum: forum, type: type, message: message, url: url}
+        const result = await dao.insertDatum('posts',mutation);
+        return new Post(result.ops[0]);
+    }
 };
 
 app.use('/graphql', graphqlHTTP({

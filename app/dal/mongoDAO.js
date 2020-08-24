@@ -37,6 +37,21 @@ class MongoDAO extends DAO {
             });
         });
     }
+
+    insertDatum(collectionName, mutation) {
+        return new Promise((resolve, reject) => {
+            this.getCollection(collectionName,(dbClient, collection) => {
+                collection.insertOne(mutation)
+                    .then((data) => {
+                        dbClient.close();
+                        resolve(data);
+                    })
+                    .catch((err) => {
+                        reject("Couldn't insert item: "+err);
+                    })
+            });
+        });
+    }
     
     getData(collectionName, query) {
         return new Promise((resolve, reject) => {
