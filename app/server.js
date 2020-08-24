@@ -98,41 +98,6 @@ app.use('/graphql', graphqlHTTP({
     graphiql: true
 }));
 
-// Routes
-app.get('/api/forums', (req, res) => {
-    dao.getData('forums', {})
-        .then(data => res.json(data))
-        .catch(err => console.log(err));
-});
-
-app.get('/api/forums/:forumName/posts', (req, res) => {
-    dao.getData('posts',{ forum : req.params.forumName})
-        .then(data => res.json(data))
-        .catch(err => console.log(err));
-});
-
-app.get('/api/posts', (req, res) => {
-    let sortMethodName = req.query.sortMethod;
-    let sortMethod = {};
-
-    switch (sortMethodName) {
-        case "new": sortMethod = { timePosted: -1}; break;
-        case "hot": sortMethod = { numComments: -1}; break;
-        default: sortMethod = { numComments: -1}; break;
-    }
-
-    dao.getSortedData('posts', {}, sortMethod)
-        .then(data => res.json(data))
-        .catch(err => console.log(err));
-});
-
-app.get('/api/posts/:postId', (req, res) => {
-    dao.getDatumById('posts',req.params.postId)
-        .then(data => res.json(data))
-        .catch(err => console.log(err));
-});
-
-
 app.listen(port, () => {
     console.log(`Server listening at http://localhost:${port}`)
 });
