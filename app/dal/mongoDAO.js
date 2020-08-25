@@ -22,6 +22,21 @@ class MongoDAO extends DAO {
                 console.log("Couldn't connect: "+err);
             });
     }
+
+    getDatum(collectionName, query) {
+        return new Promise((resolve, reject) => {
+            this.getCollection(collectionName,(dbClient, collection) => {
+                collection.findOne(query)
+                    .then((data) => {
+                        dbClient.close();
+                        resolve(data);
+                    })
+                    .catch((err) => {
+                        reject("Couldn't fetch collection: "+err);
+                    })
+            });
+        });
+    }
     
     getDatumById(collectionName, id) {
         return new Promise((resolve, reject) => {

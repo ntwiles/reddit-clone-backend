@@ -25,6 +25,7 @@ app.use(express.static(__dirname + '/public'));
 let schema = buildSchema(`
     type Forum {
         name: String
+        rules: String
     }
 
     type Post {
@@ -38,18 +39,21 @@ let schema = buildSchema(`
 
     type Query {
         forums: [Forum]
+        forum(name: String!): Forum
         posts(sortMethod: String, forum: String): [Post]
         post(id: String!): Post
     }
 
     type Mutation {
         createPost(title: String!, forum: String!, message: String, url: String, type: String!): Post
+        createForum(name: String!, rules: String!) : Forum
     }
 `);
 
 class Forum {
     constructor(data) {
         this.name = data.name;
+        this.rules = data.rules;
     }
 }
 
@@ -69,6 +73,11 @@ let root = {
         let query = {};
         const forums = await dao.getData('forums',query);
         return forums.map(f => new Forum(f));
+    },
+    forum: async({name}) => {
+        let query = { name: name };
+        const forum = await dao.getDatum('forums',query);
+        return new Forum(forum);
     },
     posts: async ({forum, sortMethod}) => {
         let query = {};
@@ -98,6 +107,11 @@ let root = {
         const mutation = { title: title, forum: forum, type: type, message: message, url: url}
         const result = await dao.insertDatum('posts',mutation);
         return new Post(result.ops[0]);
+    },
+    createForum: async ({name, rules}) => {
+        const mutation = { name: name, rules: rules}
+        const result = await dao.insertDatum('forums',mutation);
+        return new Forum(result.ops[0]);
     }
 };
 
